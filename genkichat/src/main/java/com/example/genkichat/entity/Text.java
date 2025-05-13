@@ -23,12 +23,12 @@ public class Text {
 	private Integer id;
 
 	@ManyToOne
-	@JoinColumn(name = "title_id")
-	private BoardTitle title;
-	
+	@JoinColumn(name = "board_id")
+	private Board board;
+
 	@Column(name = "text")
 	private String text;
-	
+
 	@Column(name = "nickname")
 	private String nickname;
 
@@ -37,4 +37,5 @@ public class Text {
 
 	@Column(name = "updated_at", insertable = false, updatable = false)
 	private Timestamp updatedAt;
+
 }

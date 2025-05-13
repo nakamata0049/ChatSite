@@ -6,4 +6,5 @@ import lombok.Data;
 public class TextForm {
     private String nickname;
     private String text;
+    private Integer titleId;
 }

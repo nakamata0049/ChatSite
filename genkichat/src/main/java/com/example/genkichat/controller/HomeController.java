@@ -1,5 +1,7 @@
 package com.example.genkichat.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -7,38 +9,53 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.genkichat.entity.BoardTitle;
-import com.example.genkichat.repository.BoardTitleRepository;
+import com.example.genkichat.entity.Board;
+import com.example.genkichat.entity.Text;
+import com.example.genkichat.repository.BoardRepository;
+import com.example.genkichat.repository.TextRepository;
+import com.example.genkichat.service.BoardService;
 
 @Controller
 public class HomeController {
-	private final BoardTitleRepository boardTitleRepository;
+	private final BoardRepository boardRepository;
+	private final TextRepository textRepository;
+	private BoardService boardService;
 
-	public HomeController(BoardTitleRepository boardTitleRepository) {
-		this.boardTitleRepository = boardTitleRepository;
+	public HomeController(BoardRepository boardRepository, TextRepository textRepository, BoardService boardService) {
+		this.boardRepository = boardRepository;
+		this.textRepository = textRepository;
+		this.boardService = boardService;
 	}
 
 	@GetMapping("/")
 	public String index(@RequestParam(name = "keyword", required = false) String keyword,
 			@PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable,
 			Model model) {
-		
-		 // ログを追加して、pageableが正しく設定されているか確認
-	    System.out.println("Pageable: " + pageable);
-		
-		Page<BoardTitle> boardTitlePage = Page.empty();  // 空のページで初期化
+
+		Page<Board> boardPage = Page.empty(); // 空のページで初期化
 
 		if (keyword != null && !keyword.isEmpty()) {
-			boardTitlePage = boardTitleRepository.findByTitleLike("%" + keyword + "%", pageable);
+			boardPage = boardRepository.findByTitleLike("%" + keyword + "%", pageable);
 		} else {
-			boardTitlePage = boardTitleRepository.findAll(pageable);
+			boardPage = boardRepository.findAllByOrderByCreatedAtDesc(pageable);
 		}
 
-		model.addAttribute("boardTitlePage", boardTitlePage);
+		List<Text> latestTexts = textRepository.findTop5ByOrderByCreatedAtDesc();
+
+		model.addAttribute("boardPage", boardPage);
 		model.addAttribute("keyword", keyword);
+		model.addAttribute("latestTexts", latestTexts);
 
 		return "index";
 	}
+
+	@PostMapping("/boards/create")
+	public String createBoard(@RequestParam String title, @RequestParam String text) {
+		Integer boardId = boardService.createBoardWithText(title, text);
+		return "redirect:/boards/" + boardId;
+	}
+
 }

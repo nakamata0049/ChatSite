@@ -15,8 +15,8 @@
 
 		<main>
 			<div class="container pt-4 pb-5 genkichat-container">
-	
-				<div th:if="${param.loggedIn}" class="alert alert-info">
+
+				<!--div th:if="${param.loggedIn}" class="alert alert-info">
 					ログインしました。
 				</div>
 
@@ -26,83 +26,105 @@
 
 				<div th:if="${successMessage}" class="alert alert-info">
 					<span th:text="${successMessage}"></span>
-				</div>
+				</div-->
 
-				<div class="row justify-content-center">
-					<div class="col-xl-3 col-lg-4 col-md-12">
+				<div class="row">
+
+					<div class="col-md-3 mb-3">
+						<!-- 検索フォーム -->
 						<form method="get" th:action="@{/}" class="w-100 mb-3">
 							<div class="input-group">
 								<input type="text" class="form-control" name="keyword" th:value="${keyword}">
-								<button type="submit" class="btn text-white shadow-sm genkichat-btn">検索</button>
+								<button type="submit" class="btn btn-primary">検索</button>
 							</div>
+						</form>
+						
+						<div style="margin-bottom: 250px;"></div> <!-- 余白 -->
+						
+						<!-- 掲示板作成フォーム -->
+						<form method="post" th:action="@{/boards/create}" class="w-100">
+							<div class="mb-3">
+								<label for="title" class="form-label">タイトル</label>
+								<input type="text" id="title" name="title" class="form-control" required>
+							</div>
+							<div class="mb-3">
+								<label for="text" class="form-label">本文</label>
+								<textarea id="text" name="text" class="form-control" rows="3" required></textarea>
+							</div>
+							<button type="submit" class="btn btn-success">掲示板を作成</button>
 						</form>
 					</div>
 
-					<div class="col">
-						<div class="d-flex justify-content-between flex-wrap">
-							<p th:if="${boardTitlePage != null && boardTitlePage.totalPages > 1}" class="fs-5 mb-3"
-								th:text="${boardTitlePage.totalElements + '件' + ' (' + (boardTitlePage.number + 1) + ' / ' + boardTitlePage.totalPages + 'ページ)'}">
-							</p>
-							<p th:unless="${boardTitlePage != null && boardTitlePage.totalPages > 1}" class="fs-5 mb-3"
-								th:text="${boardTitlePage != null ? boardTitlePage.totalElements + '件' : '0件'}"></p>
+					<!-- 掲示板一覧 -->
+					<div class="col-md-6">
+						<!-- 件数表示 -->
+						<p th:if="${boardPage != null && boardPage.totalPages > 1}" class="fs-5 mb-3"
+							th:text="${boardPage.totalElements + '件' + ' (' + (boardPage.number + 1) + ' / ' + boardPage.totalPages + 'ページ)'}">
+						</p>
+						<p th:unless="${boardPage != null && boardPage.totalPages > 1}" class="fs-5 mb-3"
+							th:text="${boardPage != null ? boardPage.totalElements + '件' : '0件'}"></p>
 
-						</div>
-
-						<!-- boardTitlePageがnullでないことを確認 -->
-						<div th:if="${boardTitlePage != null}">
-							<div class="mb-3" th:each="board : ${boardTitlePage.content}">
+						<div th:if="${boardPage != null}">
+							<div class="mb-3" th:each="board : ${boardPage.content}">
 								<a th:href="@{/boards/__${board.id}__}" class="link-dark genkichat-card-link">
-									<div class="card h-100">
-										<div class="row g-0">
-											<div class="col-md-8">
-												<div class="card-body">
-													<h3 class="card-title mb-3" th:text="${board.title}"></h3>
-
-													<hr class="mb-3">
-
-													<p class="card-text">
-														<span th:text="${board.updatedAt}"></span>
-													</p>
-												</div>
-											</div>
+									<div class="card">
+										<div class="card-body">
+											<h5 class="card-title" th:text="${board.title}"></h5>
+											<p class="card-text">
+												更新日時：<span th:text="${board.updatedAt}"></span>
+											</p>
 										</div>
 									</div>
 								</a>
 							</div>
 						</div>
 
-						<!-- boardTitlePageがnullの場合のメッセージ -->
-						<div th:if="${boardTitlePage == null}">
-							<p>掲示板の情報が見つかりませんでした。</p>
-						</div>
+
+
 
 						<!-- ページネーション -->
-						<div th:if="${boardTitlePage != null && boardTitlePage.totalPages > 1}"
+						<div th:if="${boardPage != null && boardPage.totalPages > 1}"
 							class="d-flex justify-content-center">
 							<nav aria-label="掲示板ページ">
 								<ul class="pagination">
 									<li class="page-item">
-										<span th:if="${boardTitlePage.isFirst()}" class="page-link disabled">前</span>
-										<a th:unless="${boardTitlePage.isFirst()}"
-											th:href="@{/(page=${boardTitlePage.number - 1}, keyword=${keyword})}"
+										<span th:if="${boardPage.isFirst()}" class="page-link disabled">前</span>
+										<a th:unless="${boardPage.isFirst()}"
+											th:href="@{/(page=${boardPage.number - 1}, keyword=${keyword})}"
 											class="page-link genkichat-page-link">前</a>
 									</li>
-									<li th:each="i : ${#numbers.sequence(0, boardTitlePage.totalPages - 1)}"
+									<li th:each="i : ${#numbers.sequence(0, boardPage.totalPages - 1)}"
 										class="page-item">
-										<span th:if="${i == boardTitlePage.number}"
+										<span th:if="${i == boardPage.number}"
 											class="page-link active genkichat-active" th:text="${i + 1}"></span>
-										<a th:unless="${i == boardTitlePage.number}"
+										<a th:unless="${i == boardPage.number}"
 											th:href="@{/(page=${i}, keyword=${keyword})}"
 											class="page-link genkichat-page-link" th:text="${i + 1}"></a>
 									</li>
 									<li class="page-item">
-										<span th:if="${boardTitlePage.isLast()}" class="page-link disabled">次</span>
-										<a th:unless="${boardTitlePage.isLast()}"
-											th:href="@{/(page=${boardTitlePage.number + 1}, keyword=${keyword})}"
+										<span th:if="${boardPage.isLast()}" class="page-link disabled">次</span>
+										<a th:unless="${boardPage.isLast()}"
+											th:href="@{/(page=${boardPage.number + 1}, keyword=${keyword})}"
 											class="page-link genkichat-page-link">次</a>
 									</li>
 								</ul>
 							</nav>
+						</div>
+					</div>
+
+					<!-- 最新の5件の投稿 -->
+					<div class="col-md-3">
+						<h5>最新の投稿</h5>
+						<div th:if="${latestTexts != null}">
+							<div class="card mb-3" th:each="text : ${latestTexts}">
+								<div class="card-body">
+									<p class="card-title fw-bold mb-1" th:text="${text.board.title}">タイトル</p>
+									<p class="smal text-muted mb-2"
+										th:text="${#dates.format(text.createdAt, 'yyyy-MM-dd HH:mm')}">投稿日時"</p>
+									<p class="card-text" th:text="${#strings.replace(text.text, '\n', ' ')}"
+										style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

@@ -14,7 +14,7 @@ import lombok.Data;
 @Entity
 @Table(name = "boards")
 @Data
-public class BoardTitle {
+public class Board {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -26,6 +26,6 @@ public class BoardTitle {
 	@Column(name = "created_at", insertable = false, updatable = false)
 	private Timestamp createdAt;
 
-	@Column(name = "updated_at", insertable = false, updatable = false)
+	@Column(name = "updated_at")
 	private Timestamp updatedAt;
 }
