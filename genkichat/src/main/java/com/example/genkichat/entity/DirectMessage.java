@@ -9,46 +9,30 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import lombok.Data;
 
 @Entity
-@Table(name = "users")
+@Table(name = "direct_message")
 @Data
-public class User {
+public class DirectMessage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Integer id;
 
-	@Column(name = "name")
-	private String name;
-
-	@Column(name = "furigana")
-	private String furigana;
-
-	@Column(name = "postal_code")
-	private String postalCode;
-
-	@Column(name = "address")
-	private String address;
-
-	@Column(name = "phone_number")
-	private String phoneNumber;
-
-	@Column(name = "email")
-	private String email;
-
-	@Column(name = "password")
-	private String password;
+	@OneToOne
+	@JoinColumn(name = "user_id")
+	private User user;
 
 	@ManyToOne
-	@JoinColumn(name = "role_id")
-	private Role role;
+	@JoinColumn(name = "sender_user_id")
+	private User sender;
 
-	@Column(name = "enabled")
-	private Boolean enabled;
+	@Column(name = "text")
+	private String text;
 
 	@Column(name = "created_at", insertable = false, updatable = false)
 	private Timestamp createdAt;

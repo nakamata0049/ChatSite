@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<div th:replace="~{fragment :: meta}"></div>
+	<div th:replace="~{fragment :: styles}"></div>
+
+	<title th:text="${text[0].title.title}">タイトル</title>
+</head>
+
+<body>
+	<div class="genkichat-wrapper">
+		<!-- ヘッダー -->
+		<div th:replace="~{fragment :: header}"></div>
+
+		<main>
+			<div class="container pb-5 genkichat-container">
+				<div class="row justify-content-center">
+					<div class="col-xl-5 col-lg-6 col-md-8">
+						<nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+							<ol class="breadcrumb mb-0">
+								<li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+							</ol>
+						</nav>
+
+						<h1 class="mb-4 text-center" th:text="${text[0].title.title}">タイトル</h1>
+
+						<div th:if="${text.isEmpty()}">
+							<p>該当する投稿はありません。</p>
+						</div>
+
+						<div th:each="text : ${text}" class="card-link">
+							<div class="card shadow-sm">
+								<div class="card-body">
+									<p class="card-text small"><strong>投稿者:</strong> <span th:text="${text.nickname}"
+											class="me-3"></span>
+										<strong>投稿日時:</strong>
+										<span th:text="${#dates.format(text.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+									</p>
+									<p class="card-text fs-5"><span th:text="${text.text}"></span></p>
+								</div>
+							</div>
+						</div>
+
+					</div>
+					
+					<!-- 右側に投稿フォーム -->
+					<div class="col-xl-5 col-lg-6 col-md-8">
+						<h2 class="mb-4 text-center">新しい投稿</h2>
+						<form th:action="@{/submitPost}" method="post">
+							<div class="mb-3">
+								<label for="nickname" class="form-label">名前</label>
+								<input type="text" class="form-control" id="nickname" name="nickname" required>
+							</div>
+							<div class="mb-3">
+								<label for="text" class="form-label">投稿内容</label>
+								<textarea class="form-control" id="text" name="text" rows="10" required></textarea>
+							</div>
+							<button type="submit" class="btn btn-primary">投稿</button>
+						</form>
+					</div>
+					
+				</div>
+			</div>
+		</main>
+	</div>
+
+</body>
+
+</html>

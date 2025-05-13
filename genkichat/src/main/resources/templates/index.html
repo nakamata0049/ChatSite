@@ -4,7 +4,7 @@
 <head>
 	<div th:replace="~{fragment :: meta}"></div>
 	<div th:replace="~{fragment :: styles}"></div>
-	<title>CHATTING</title>
+	<title>GENKI CHAT</title>
 </head>
 
 <body>
@@ -15,7 +15,8 @@
 
 		<main>
 			<div class="container pt-4 pb-5 genkichat-container">
-				<div th:if="${param.loggedIn}" class="alert  alert-info">
+	
+				<div th:if="${param.loggedIn}" class="alert alert-info">
 					ログインしました。
 				</div>
 
@@ -25,6 +26,85 @@
 
 				<div th:if="${successMessage}" class="alert alert-info">
 					<span th:text="${successMessage}"></span>
+				</div>
+
+				<div class="row justify-content-center">
+					<div class="col-xl-3 col-lg-4 col-md-12">
+						<form method="get" th:action="@{/}" class="w-100 mb-3">
+							<div class="input-group">
+								<input type="text" class="form-control" name="keyword" th:value="${keyword}">
+								<button type="submit" class="btn text-white shadow-sm genkichat-btn">検索</button>
+							</div>
+						</form>
+					</div>
+
+					<div class="col">
+						<div class="d-flex justify-content-between flex-wrap">
+							<p th:if="${boardTitlePage != null && boardTitlePage.totalPages > 1}" class="fs-5 mb-3"
+								th:text="${boardTitlePage.totalElements + '件' + ' (' + (boardTitlePage.number + 1) + ' / ' + boardTitlePage.totalPages + 'ページ)'}">
+							</p>
+							<p th:unless="${boardTitlePage != null && boardTitlePage.totalPages > 1}" class="fs-5 mb-3"
+								th:text="${boardTitlePage != null ? boardTitlePage.totalElements + '件' : '0件'}"></p>
+
+						</div>
+
+						<!-- boardTitlePageがnullでないことを確認 -->
+						<div th:if="${boardTitlePage != null}">
+							<div class="mb-3" th:each="board : ${boardTitlePage.content}">
+								<a th:href="@{/boards/__${board.id}__}" class="link-dark genkichat-card-link">
+									<div class="card h-100">
+										<div class="row g-0">
+											<div class="col-md-8">
+												<div class="card-body">
+													<h3 class="card-title mb-3" th:text="${board.title}"></h3>
+
+													<hr class="mb-3">
+
+													<p class="card-text">
+														<span th:text="${board.updatedAt}"></span>
+													</p>
+												</div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+						</div>
+
+						<!-- boardTitlePageがnullの場合のメッセージ -->
+						<div th:if="${boardTitlePage == null}">
+							<p>掲示板の情報が見つかりませんでした。</p>
+						</div>
+
+						<!-- ページネーション -->
+						<div th:if="${boardTitlePage != null && boardTitlePage.totalPages > 1}"
+							class="d-flex justify-content-center">
+							<nav aria-label="掲示板ページ">
+								<ul class="pagination">
+									<li class="page-item">
+										<span th:if="${boardTitlePage.isFirst()}" class="page-link disabled">前</span>
+										<a th:unless="${boardTitlePage.isFirst()}"
+											th:href="@{/(page=${boardTitlePage.number - 1}, keyword=${keyword})}"
+											class="page-link genkichat-page-link">前</a>
+									</li>
+									<li th:each="i : ${#numbers.sequence(0, boardTitlePage.totalPages - 1)}"
+										class="page-item">
+										<span th:if="${i == boardTitlePage.number}"
+											class="page-link active genkichat-active" th:text="${i + 1}"></span>
+										<a th:unless="${i == boardTitlePage.number}"
+											th:href="@{/(page=${i}, keyword=${keyword})}"
+											class="page-link genkichat-page-link" th:text="${i + 1}"></a>
+									</li>
+									<li class="page-item">
+										<span th:if="${boardTitlePage.isLast()}" class="page-link disabled">次</span>
+										<a th:unless="${boardTitlePage.isLast()}"
+											th:href="@{/(page=${boardTitlePage.number + 1}, keyword=${keyword})}"
+											class="page-link genkichat-page-link">次</a>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</div>
 				</div>
 			</div>
 		</main>
