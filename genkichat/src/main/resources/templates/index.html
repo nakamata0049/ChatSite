@@ -32,24 +32,26 @@
 
 					<div class="col-md-3 mb-3">
 						<!-- 検索フォーム -->
-						<form method="get" th:action="@{/}" class="w-100 mb-3">
+						<form method="get" th:action="@{/}" class="w-100 mb-5">
 							<div class="input-group">
 								<input type="text" class="form-control" name="keyword" th:value="${keyword}">
 								<button type="submit" class="btn btn-primary">検索</button>
 							</div>
 						</form>
-						
-						<div style="margin-bottom: 250px;"></div> <!-- 余白 -->
-						
+
 						<!-- 掲示板作成フォーム -->
 						<form method="post" th:action="@{/boards/create}" class="w-100">
+							<div class="mb-3">
+								<label for="nickname" class="form-label">投稿者</label>
+								<input type="text" id="nickname" name="nickname" class="form-control" placeholder="※省略可">
+							</div>
 							<div class="mb-3">
 								<label for="title" class="form-label">タイトル</label>
 								<input type="text" id="title" name="title" class="form-control" required>
 							</div>
 							<div class="mb-3">
 								<label for="text" class="form-label">本文</label>
-								<textarea id="text" name="text" class="form-control" rows="3" required></textarea>
+								<textarea id="text" name="text" class="form-control" rows="10" required></textarea>
 							</div>
 							<button type="submit" class="btn btn-success">掲示板を作成</button>
 						</form>
@@ -95,8 +97,8 @@
 									</li>
 									<li th:each="i : ${#numbers.sequence(0, boardPage.totalPages - 1)}"
 										class="page-item">
-										<span th:if="${i == boardPage.number}"
-											class="page-link active genkichat-active" th:text="${i + 1}"></span>
+										<span th:if="${i == boardPage.number}" class="page-link active genkichat-active"
+											th:text="${i + 1}"></span>
 										<a th:unless="${i == boardPage.number}"
 											th:href="@{/(page=${i}, keyword=${keyword})}"
 											class="page-link genkichat-page-link" th:text="${i + 1}"></a>
@@ -117,16 +119,19 @@
 						<h5>最新の投稿</h5>
 						<div th:if="${latestTexts != null}">
 							<div class="card mb-3" th:each="text : ${latestTexts}">
-								<div class="card-body">
-									<p class="card-title fw-bold mb-1" th:text="${text.board.title}">タイトル</p>
-									<p class="smal text-muted mb-2"
-										th:text="${#dates.format(text.createdAt, 'yyyy-MM-dd HH:mm')}">投稿日時"</p>
-									<p class="card-text" th:text="${#strings.replace(text.text, '\n', ' ')}"
-										style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
-								</div>
+								<a th:href="@{/boards/__${text.board.id}__}" class="text-decoration-none text-dark">
+									<div class="card-body">
+										<p class="card-title fw-bold mb-1" th:text="${text.board.title}">タイトル</p>
+										<p class="smal text-muted mb-2"
+											th:text="${#dates.format(text.createdAt, 'yyyy-MM-dd HH:mm')}">投稿日時"</p>
+										<p class="card-text" th:text="${#strings.replace(text.text, '\n', ' ')}"
+											style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+									</div>
+								</a>
 							</div>
 						</div>
 					</div>
+
 				</div>
 			</div>
 		</main>

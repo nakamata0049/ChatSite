@@ -9,11 +9,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.genkichat.entity.Board;
 import com.example.genkichat.entity.Text;
+import com.example.genkichat.form.BoardForm;
 import com.example.genkichat.repository.BoardRepository;
 import com.example.genkichat.repository.TextRepository;
 import com.example.genkichat.service.BoardService;
@@ -53,8 +55,8 @@ public class HomeController {
 	}
 
 	@PostMapping("/boards/create")
-	public String createBoard(@RequestParam String title, @RequestParam String text) {
-		Integer boardId = boardService.createBoardWithText(title, text);
+	public String createBoard(@ModelAttribute BoardForm boardForm) {
+		Integer boardId = boardService.createBoardWithText(boardForm);
 		return "redirect:/boards/" + boardId;
 	}
 

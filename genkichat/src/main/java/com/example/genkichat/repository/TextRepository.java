@@ -11,4 +11,8 @@ public interface TextRepository extends JpaRepository<Text, Integer> {
 	List<Text> findByBoard(Board board);
 
 	List<Text> findTop5ByOrderByCreatedAtDesc();
+
+	List<Text> findByBoardId(Integer boardId);
+
+	List<Text> findByBoardIdOrderByCreatedAtDesc(Integer boardId);
 }

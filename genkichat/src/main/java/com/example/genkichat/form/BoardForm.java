@@ -3,6 +3,8 @@ package com.example.genkichat.form;
 import lombok.Data;
 
 @Data
-public class TitleForm {
+public class BoardForm {
+	private String nickname;
 	private String title;
+	private String text;
 }

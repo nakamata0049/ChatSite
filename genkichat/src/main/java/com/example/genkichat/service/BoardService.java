@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.genkichat.entity.Board;
 import com.example.genkichat.entity.Text;
+import com.example.genkichat.form.BoardForm;
 import com.example.genkichat.repository.BoardRepository;
 import com.example.genkichat.repository.TextRepository;
 
@@ -22,22 +23,33 @@ public class BoardService {
 	}
 
 	@Transactional
-	public Integer createBoardWithText(String title, String textContent) {
+	public Integer createBoardWithText(BoardForm boardForm) {
 		Timestamp now = Timestamp.from(Instant.now());
 		// Boardの保存
 		Board board = new Board();
-		board.setTitle(title);
+		board.setTitle(boardForm.getTitle());
 		board.setUpdatedAt(now);
 		board = boardRepository.save(board);
 
 		// Textの保存
 		Text text = new Text();
-		text.setText(textContent);
+		if (!boardForm.getNickname().isEmpty()) {
+			text.setNickname(boardForm.getNickname());
+		} else {
+			text.setNickname("匿名");
+		}
+
+		text.setText(boardForm.getText());
 		text.setCreatedAt(now);
 		text.setBoard(board); // 外部キーとしてBoardをセット
 		textRepository.save(text);
 
 		return board.getId();
+	}
+
+	public void deleteBoardById(Integer boardId) {
+		boardRepository.deleteById(boardId);
+
 	}
 
 }

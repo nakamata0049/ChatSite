@@ -4,71 +4,161 @@
 <head>
 	<div th:replace="~{fragment :: meta}"></div>
 	<div th:replace="~{fragment :: styles}"></div>
-
-	<title th:text="${text[0].board.title}">タイトル</title>
+	<title th:text="${board.title}">タイトル</title>
 </head>
 
 <body>
 	<div class="genkichat-wrapper">
+
 		<!-- ヘッダー -->
 		<div th:replace="~{fragment :: header}"></div>
 
 		<main>
-			<div class="container pb-5 genkichat-container">
-				<div class="row justify-content-center">
-					<div class="col-xl-5 col-lg-6 col-md-8">
+			<div class="container pt-4 pb-5 genkichat-container">
+				<div class="row">
+
+					<!-- 左側：投稿フォーム -->
+					<div class="col-md-3 mb-3">
+						<h5 class="mb-4 text-center">新しい投稿</h5>
+						<form th:action="@{/boards/createText}" method="post">
+							<!--input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /-->
+							<input type="hidden" name="boardId" th:value="${board.id}" />
+
+							<div class="mb-3">
+								<label for="nickname" class="form-label">投稿者</label>
+								<input type="text" class="form-control" id="nickname" name="nickname"
+									placeholder="※省略可">
+							</div>
+							<div class="mb-3">
+								<label for="text" class="form-label">本文</label>
+								<textarea class="form-control" id="text" name="text" rows="10" required></textarea>
+							</div>
+							<button type="submit" class="btn btn-success">投稿</button>
+						</form>
+					</div>
+
+					<!-- 中央：掲示板の投稿内容 -->
+					<div class="col-md-6 mb-3">
 						<nav class="my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0">
 								<li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
 							</ol>
 						</nav>
 
-						<h1 class="mb-4 text-center" th:text="${text[0].board.title}">タイトル</h1>
+						<h1 class="mb-4 text-center" th:text="${board.title}">タイトル</h1>
 
-						<div th:if="${text.isEmpty()}">
+						<!-- 投稿が0件の場合に表示 -->
+						<div th:if="${texts != null and texts.size() == 0}">
 							<p>該当する投稿はありません。</p>
+
+							<div sec:authorize="hasRole('ROLE_ADMIN')">
+								<form th:action="@{/boards/deleteBoard}" method="post">
+									<input type="hidden" name="boardId" th:value="${board.id}" />
+									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+									<button type="submit" class="btn btn-danger mt-2">掲示板を削除</button>
+								</form>
+							</div>
 						</div>
 
-						<div th:each="text : ${text}" class="card-link">
+
+						<!-- 投稿のループ -->
+						<div th:each="text : ${texts}" class="card-link mb-3">
 							<div class="card shadow-sm">
 								<div class="card-body">
-									<p class="card-text small"><strong>投稿者:</strong> <span th:text="${text.nickname}"
-											class="me-3"></span>
+									<p class="card-text small">
+										<strong>投稿者:</strong> <span th:text="${text.nickname}" class="me-3"></span>
 										<strong>投稿日時:</strong>
 										<span th:text="${#dates.format(text.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
 									</p>
-									<p class="card-text fs-5"><span th:text="${text.text}"></span></p>
+									<p class="card-text fs-5" th:text="${text.text}"></p>
+
+									<!-- 管理者のみ表示 -->
+									<div sec:authorize="hasRole('ROLE_ADMIN')" class="text-end">
+										<!-- 削除ボタン（モーダル起動） -->
+										<button type="button" class="btn btn-sm btn-outline-danger"
+											data-bs-toggle="modal" th:data-bs-target="${'#deleteModal-' + text.id}">
+											削除
+										</button>
+									</div>
+
+									<!-- モーダル定義 -->
+									<div class="modal fade" th:id="${'deleteModal-' + text.id}" tabindex="-1"
+										aria-labelledby="deleteModalLabel" aria-hidden="true">
+										<div class="modal-dialog">
+											<div class="modal-content">
+
+												<div class="modal-header">
+													<h5 class="modal-title" id="deleteModalLabel">削除確認</h5>
+													<button type="button" class="btn-close" data-bs-dismiss="modal"
+														aria-label="閉じる"></button>
+												</div>
+
+												<div class="modal-body">
+													<p>この投稿を削除してもよろしいですか？</p>
+												</div>
+												<div class="modal-footer">
+													<!-- 投稿のみ削除 -->
+													<form th:action="@{/boards/deleteText}" method="post"
+														th:object="${text}">
+														<input type="hidden" name="textId" th:value="${text.id}" />
+														<input type="hidden" name="boardId" th:value="${board.id}" />
+														<input type="hidden" th:name="${_csrf.parameterName}"
+															th:value="${_csrf.token}" />
+														<button type="submit" class="btn btn-danger">投稿を削除</button>
+													</form>
+
+													<!-- 投稿＋掲示板削除(1件だけのときのみ表示) -->
+													<form th:if="${#lists.size(texts) == 1}"
+														th:action="@{/boards/deleteBoardWithText}" method="post">
+														<input type="hidden" name="textId" th:value="${text.id}" />
+														<input type="hidden" name="boardId" th:value="${board.id}" />
+														<input type="hidden" th:name="${_csrf.parameterName}"
+															th:value="${_csrf.token}" />
+														<button type="submit" class="btn btn-danger">投稿と掲示板を削除</button>
+													</form>
+
+													<button type="button" class="btn btn-secondary"
+														data-bs-dismiss="modal">キャンセル</button>
+
+												</div>
+											</div>
+										</div>
+									</div>
+
 								</div>
 							</div>
 						</div>
-
 					</div>
-					
-					<!-- 右側に投稿フォーム -->
-					<div class="col-xl-4 col-lg-5 col-md-6">
-						<h5 class="mb-4 text-center">新しい投稿</h5>
-						<form th:action="@{/boards/createText}" method="post">
-							<!--input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /-->
 
-							<input type="hidden" name="titleId" th:value="${text[0].board.id}" />
-							
-							<div class="mb-3">
-								<label for="nickname" class="form-label">名前</label>
-								<input type="text" class="form-control" id="nickname" name="nickname" required>
+					<!-- 右側：最新の投稿 -->
+					<div class="col-md-3">
+						<h5 class="mb-3">最新の投稿</h5>
+						<div th:if="${latestTexts != null}">
+							<div class="card mb-3" th:each="text : ${latestTexts}">
+								<a th:href="@{/boards/__${text.board.id}__}" class="text-decoration-none text-dark">
+									<div class="card-body">
+										<p class="card-title fw-bold mb-1" th:text="${text.board.title}">タイトル</p>
+										<p class="small text-muted mb-2"
+											th:text="${#dates.format(text.createdAt, 'yyyy-MM-dd HH:mm')}"></p>
+										<p class="card-text" th:text="${#strings.replace(text.text, '\n', ' ')}"
+											style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+										</p>
+									</div>
+								</a>
 							</div>
-							<div class="mb-3">
-								<label for="text" class="form-label">投稿内容</label>
-								<textarea class="form-control" id="text" name="text" rows="10" required></textarea>
-							</div>
-							<button type="submit" class="btn btn-primary">投稿</button>
-						</form>
+						</div>
 					</div>
-					
+
 				</div>
 			</div>
 		</main>
+
+		<!-- フッター -->
+		<div th:replace="~{fragment :: footer}"></div>
+
 	</div>
 
+	<div th:replace="~{fragment :: scripts}"></div>
 </body>
 
 </html>
